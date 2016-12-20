@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <time.h>
 #include <iostream>
+#include <cstring>
 using namespace std;
 struct matrice
 {
@@ -20,22 +22,62 @@ int nr_bombe(matrice a,int i,int j)
 }
 void generare_harta(matrice &a)
 {
-    int i=0;
-    while(i<9)
+    for(int i=0;i<9;i++)
+        for(int j=0;j<9;j++)
+        {
+            a.mat[i][j].val=0;  a.mat[i][j].deschisa=0;a.mat[i][j].marcat=0;
+        }
+    srand((unsigned)time(0));
+    int i=0; int l,c;
+    while(i<8)
     {
         i++;
-        int l=rand()%9;
-        int c=rand()%9;
-        while(a.mat[l][c].val!=0)
+
+        l=rand()%9;
+        c=rand()%9;
+        while(a.mat[l][c].val==-1)
         {
             l=rand()%9; c=rand()%9;
         }
-        a.mat[l][c].val=-1; a.mat[l][c].deschisa=0;
+        a.mat[l][c].val=-1;
     }
     for(int i=0;i<9;i++)
         for(int j=0;j<9;j++)
             if(a.mat[i][j].val!=-1)
-                {a.mat[i][j].val=nr_bombe(a,i,j); a.mat[i][j].deschisa=0;}
+                {a.mat[i][j].val=nr_bombe(a,i,j);}
+}
+int dl[]={-1,-1,0,1,1,1,0,-1}, dc[]={0,1,1,1,0,-1,-1,-1};
+void BKT_Fill(matrice &a, int i, int j)
+{
+    a.mat[i][j].deschisa=1;
+    for(int dir=0;dir<8;dir++)
+    {
+        int ln=i+dl[dir];
+        int cn=j+dc[dir];
+        if(ln>=0&&ln<=8&&cn>=0&&cn<=8&&a.mat[ln][cn].deschisa==0)
+            if(a.mat[ln][cn].val==0)
+                BKT_Fill(a,ln,cn);
+            else
+                a.mat[ln][cn].deschisa=1;
+
+    }
+}
+int corect(matrice a)
+{
+    for(int i=0;i<9;i++)
+        for(int j=0;j<9;j++)
+            {if(a.mat[i][j].val==-1&&a.mat[i][j].marcat==0)
+                return 0;
+            if(a.mat[i][j].val!=-1&&a.mat[i][j].deschisa==0)
+                return 0;}
+    return 1;
+}
+void deschidere (matrice &a,int i, int j)
+{
+    if(a.mat[i][j].deschisa==1) return;
+    if(a.mat[i][j].marcat==1) return;
+    if(a.mat[i][j].val!=0) {a.mat[i][j].deschisa=1; return;}
+    BKT_Fill(a,i,j);
 }
 void afisare(matrice a)
 {   cout<<" "<<'|'<<"_";
@@ -51,7 +93,7 @@ void afisare(matrice a)
             else
                 if(a.mat[i][j].marcat==1)
                     cout<<'F'<<" ";
-            else
+                else
                 cout<<a.mat[i][j].val<<" ";
         cout<<endl;
     }
@@ -81,30 +123,41 @@ int main(void)
 {
     matrice a;
     generare_harta(a);
-    int x,y; char s;
+    afisare(a);
+    int x,y; char s[4];
+    cout<<"Introduceti coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
     cin>>x>>y;
-    cout<<"Dati f(flag/marcare mina) sau d(deschide)";
-    cin>>s;
-    if(a.mat[x][y].val==-1&&s=='d')
-    {   cout<<"Ai pierdut. Mai incearca!"<<endl;
+    cout<<"Dati f (flag/marcare mina), d (deschide) sau u (unflag/demarcare mina)."<<" ";
+    cin.getline(s,4);
+    if(a.mat[x][y].val==-1&&strcmp(s,"d")==0)
+    {   system("cls");cout<<"Ai pierdut. Mai incearca!"<<endl;
         afisare_pierdere(a); return 0;
     }
-    while(castig(a)==0)
-    {
-        if(s=='d')
+    while(corect(a)==0)
+    {   if (strlen(s)>1)
+        {cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl; cin>>x>>y; cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";cin.getline(s,4); continue;}
+        if((strcmp(s,"d")!=0&&strcmp(s,"f")!=0&&strcmp(s,"u")!=0)||!(x>=0&&x<=8&&y>=0&&y<=8))
+        {cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl; cin>>x>>y; cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";cin.getline(s,4); continue;}
+        if(strcmp(s,"d")==0)
             {deschidere(a,x,y); system("cls"); afisare(a);}
         else
+        if(strcmp(s,"f")!=0)
         {
             a.mat[x][y].marcat=1; system("cls"); afisare(a);
         }
-        if(castig(a)==1)
+        else
+        {
+            a.mat[x][y].marcat=0; system("cls"); afisare(a);
+        }
+        if(corect(a)==1)
         {
             system("cls"); cout<<"Ai castigat!"; return 0;
         }
+        cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl;
         cin>>x>>y;
-        cout<<"Dati f(flag/marcare mina) sau d(deschide)";
+        cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";
         cin>>s;
-        if(a.mat[x][y].val==-1&&s=='d')
+        if(a.mat[x][y].val==-1&&strcmp(s,"d")==0)
             {
             system("cls");
             cout<<"Ai pierdut. Mai incearca!"<<endl;
