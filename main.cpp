@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
-#include <cstring>
 using namespace std;
 struct matrice
 {
@@ -124,24 +123,22 @@ int main(void)
     matrice a;
     generare_harta(a);
     afisare(a);
-    int x,y; char s[4];
-    cout<<"Introduceti coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
+    int x,y; char s;
+    cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
     cin>>x>>y;
-    cout<<"Dati f (flag/marcare mina), d (deschide) sau u (unflag/demarcare mina)."<<" ";
-    cin.getline(s,4);
-    if(a.mat[x][y].val==-1&&strcmp(s,"d")==0)
+    cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
+    cin>>s;
+    if(a.mat[x][y].val==-1&&s=='d')
     {   system("cls");cout<<"Ai pierdut. Mai incearca!"<<endl;
         afisare_pierdere(a); return 0;
     }
     while(corect(a)==0)
-    {   if (strlen(s)>1)
-        {cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl; cin>>x>>y; cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";cin.getline(s,4); continue;}
-        if((strcmp(s,"d")!=0&&strcmp(s,"f")!=0&&strcmp(s,"u")!=0)||!(x>=0&&x<=8&&y>=0&&y<=8))
-        {cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl; cin>>x>>y; cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";cin.getline(s,4); continue;}
-        if(strcmp(s,"d")==0)
+    {   if((s!='d'&&s!='f'&&s!='u')||!(x>=0&&x<=8&&y>=0&&y<=8))
+        {cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl; cin>>x>>y; cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";cin>>s; continue;}
+        if(s=='d')
             {deschidere(a,x,y); system("cls"); afisare(a);}
         else
-        if(strcmp(s,"f")!=0)
+            if(s=='f')
         {
             a.mat[x][y].marcat=1; system("cls"); afisare(a);
         }
@@ -153,11 +150,11 @@ int main(void)
         {
             system("cls"); cout<<"Ai castigat!"; return 0;
         }
-        cout<<"Ce casuta vreti sa deschideti/marcati?"<<endl;
+        cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
         cin>>x>>y;
-        cout<<"Dati f(flag/marcare mina) sau d(deschide)"<<" ";
+        cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
         cin>>s;
-        if(a.mat[x][y].val==-1&&strcmp(s,"d")==0)
+        if(a.mat[x][y].val==-1&&s=='d')
             {
             system("cls");
             cout<<"Ai pierdut. Mai incearca!"<<endl;
