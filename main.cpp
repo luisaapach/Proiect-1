@@ -1,92 +1,96 @@
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+#include <cstring>
+#include <iomanip>
 using namespace std;
 struct matrice
 {
-    struct { int val; unsigned int deschisa; unsigned int marcat;}mat[10][10];
+    struct { int val; unsigned int deschisa; unsigned int marcat;}mat[17][17];
 };
-int nr_bombe(matrice a,int i,int j)
+void umplere(matrice &a,int i,int j,int dim)
 {
-    int nr=0; a.mat[i][j].val=0;
     int di[]={-1,-1,0,1,1,1,0,-1},dj[]={0,1,1,1,0,-1,-1,-1};
     for(int k=0;k<8;k++)
     {
         int l=i+di[k]; int c=j+dj[k];
-        if(l>=0&&l<=8&&c<=8&&c>=0)
-            if(a.mat[l][c].val==-1)
-                nr++;
+        if(l>=0&&l<dim&&c<dim&&c>=0)
+            if(a.mat[l][c].val!=-1)
+                a.mat[l][c].val++;
     }
-    return nr;
 }
-void generare_harta(matrice &a)
+void generare_harta(matrice &a,int dim)
 {
-    for(int i=0;i<9;i++)
-        for(int j=0;j<9;j++)
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
         {
             a.mat[i][j].val=0;  a.mat[i][j].deschisa=0;a.mat[i][j].marcat=0;
         }
     srand((unsigned)time(0));
-    int i=0; int l,c;
-    while(i<8)
+    int i=0;unsigned int l,c;
+    while(i<dim)
     {
         i++;
-
-        l=rand()%9;
-        c=rand()%9;
+        l=rand()%dim;
+        c=rand()%dim;
         while(a.mat[l][c].val==-1)
         {
-            l=rand()%9; c=rand()%9;
+            l=rand()%dim; c=rand()%dim;
         }
         a.mat[l][c].val=-1;
     }
-    for(int i=0;i<9;i++)
-        for(int j=0;j<9;j++)
-            if(a.mat[i][j].val!=-1)
-                {a.mat[i][j].val=nr_bombe(a,i,j);}
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
+            if(a.mat[i][j].val==-1)
+                umplere(a,i,j,dim);
+
 }
 int dl[]={-1,-1,0,1,1,1,0,-1}, dc[]={0,1,1,1,0,-1,-1,-1};
-void BKT_Fill(matrice &a, int i, int j)
+void BKT_Fill(matrice &a, int i, int j,int dim)
 {
     a.mat[i][j].deschisa=1;
     for(int dir=0;dir<8;dir++)
     {
         int ln=i+dl[dir];
         int cn=j+dc[dir];
-        if(ln>=0&&ln<=8&&cn>=0&&cn<=8&&a.mat[ln][cn].deschisa==0)
+        if(ln>=0&&ln<dim&&cn>=0&&cn<dim&&a.mat[ln][cn].deschisa==0)
             if(a.mat[ln][cn].val==0)
-                BKT_Fill(a,ln,cn);
+                BKT_Fill(a,ln,cn,dim);
             else
                 a.mat[ln][cn].deschisa=1;
 
     }
 }
-int corect(matrice a)
+int corect(matrice a,int dim)
 {
-    for(int i=0;i<9;i++)
-        for(int j=0;j<9;j++)
+    for(int i=0;i<dim;i++)
+        for(int j=0;j<dim;j++)
             {if(a.mat[i][j].val==-1&&a.mat[i][j].marcat==0)
                 return 0;
             if(a.mat[i][j].val!=-1&&a.mat[i][j].deschisa==0)
                 return 0;}
     return 1;
 }
-void deschidere (matrice &a,int i, int j)
+void deschidere (matrice &a,int i, int j,int dim)
 {
     if(a.mat[i][j].deschisa==1) return;
     if(a.mat[i][j].marcat==1) return;
     if(a.mat[i][j].val!=0) {a.mat[i][j].deschisa=1; return;}
-    BKT_Fill(a,i,j);
+    BKT_Fill(a,i,j,dim);
 }
-void afisare(matrice a)
-{   cout<<" "<<'|'<<"_";
-    for(unsigned int i=0;i<9;i++)
-        cout<<i<<"_";
+void afisare(matrice a,int dim,int flags)
+{   cout<<setw(2)<<" "<<'|';
+    for(unsigned int i=0;i<10;i++)
+        cout<<setw(2)<<i;
+    for(unsigned int i=10;i<dim;i++)
+        cout<<setw(2)<<char(i-10+'A');
     cout<<endl;
-    for(unsigned int i=0;i<9;i++)
-    {
-        cout<<i<<'|'<<" ";
-        for(unsigned int j=0;j<9;j++)
+    for(unsigned int i=0;i<dim;i++)
+    {   if(i<10)
+            cout<<setw(2)<<i<<'|'<<" ";
+        else
+            cout<<setw(2)<<char(i-10+'A')<<'|'<<" ";
+        for(unsigned int j=0;j<dim;j++)
             if(a.mat[i][j].deschisa==0&&a.mat[i][j].marcat==0)
                 cout<<'X'<<" ";
             else
@@ -96,19 +100,23 @@ void afisare(matrice a)
                 cout<<a.mat[i][j].val<<" ";
         cout<<endl;
     }
+    cout<<"Mai aveti disponibile "<<flags<<" flag-uri."<<endl;
 }
-void afisare_pierdere(matrice a)
-{
-    cout<<" "<<'|'<<"_";
-    for(unsigned int i=0;i<9;i++)
-        cout<<i<<"_";
-    cout<<endl;
-    for(unsigned int i=0;i<9;i++)
+void afisare_pierdere(matrice a,int dim)
+{   int bombeRamase=0;
+    cout<<setw(2)<<" "<<'|';
+    for(unsigned int i=0;i<10;i++)
+        cout<<setw(2)<<i;
+    for(unsigned int i=10;i<dim;i++)
+        cout<<setw(2)<<char(i-10+'A');
+    for(unsigned int i=0;i<dim;i++)
     {
         cout<<i<<'|'<<" ";
-        for(unsigned int j=0;j<9;j++)
+        for(unsigned int j=0;j<dim;j++)
             if(a.mat[i][j].val==-1)
-                cout<<char(254)<<" ";
+                {cout<<char(254)<<" ";
+                if(a.mat[i][j].marcat==0)
+                    bombeRamase++;}
             else
                 if(a.mat[i][j].deschisa==0)
                     cout<<'X'<<" ";
@@ -116,49 +124,90 @@ void afisare_pierdere(matrice a)
                     cout<<a.mat[i][j].val<<" ";
         cout<<endl;
     }
+    cout<<"Mai aveati de descoperit "<<bombeRamase<<" mine.";
 }
 
 int main(void)
 {
     matrice a;
-    generare_harta(a);
-    afisare(a);
-    int x,y; char s;
+    char tip[20];
+    cout<<"Sunteti incepator sau intermediar?"<<endl;
+    cin.getline(tip,20);
+    while(!(strcmp(tip,"incepator")==0||strcmp(tip,"Incepator")==0||strcmp(tip,"intermediar")==0||strcmp(tip,"Intermediar")==0))
+         cin.getline(tip,20);
+    int dimensiune;
+    if(strcmp(tip,"incepator")==0||strcmp(tip,"Incepator")==0)
+        dimensiune=9;
+    else
+        dimensiune=16;
+    generare_harta(a,dimensiune);
+    int flags=dimensiune;
+    afisare(a,dimensiune,flags);
+    int x,y;char s,t[100];
     cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
-    cin>>x>>y;
+    while(t[1]!=' '&&strlen(t)!=3&&!((t[0]>='0'&&t[0]<='9'||t[0]>='A'&&t[0]<='Z')&&(t[2]>='0'&&t[2]<='9'||t[2]>='A'&&t[2]<='Z')))
+        cin.getline(t,100);
+    if(t[0]>='0'&&t[0]<='9')
+        x=int(t[0]-'0');
+    else
+        x=int(t[0]-'A'+10);
+    if(t[2]>='0'&&t[2]<='9')
+        y=int(t[2]-'0');
+    else
+        y=int(t[2]-'A'+10);
     cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
     cin>>s;
     if(a.mat[x][y].val==-1&&s=='d')
     {   system("cls");cout<<"Ai pierdut. Mai incearca!"<<endl;
-        afisare_pierdere(a); return 0;
+        afisare_pierdere(a,dimensiune); return 0;
     }
-    while(corect(a)==0)
-    {   if((s!='d'&&s!='f'&&s!='u')||!(x>=0&&x<=8&&y>=0&&y<=8))
-        {cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl; cin>>x>>y; cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";cin>>s; continue;}
+    while(corect(a,dimensiune)==0)
+    {   if((s!='d'&&s!='f'&&s!='u')||!(x>=0&&x<dimensiune&&y>=0&&y<dimensiune))
+        {cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
+    while(t[1]!=' '&&strlen(t)!=3&&!((t[0]>='0'&&t[0]<='9'||t[0]>='A'&&t[0]<='Z')&&(t[2]>='0'&&t[2]<='9'||t[2]>='A'&&t[2]<='Z')))
+        cin.getline(t,100);
+    if(t[0]>='0'&&t[0]<='9')
+        x=int(t[0]-'0');
+    else
+        x=int(t[0]-'A'+10);
+    if(t[2]>='0'&&t[2]<='9')
+        y=int(t[2]-'0');
+    else
+        y=int(t[2]-'A'+10);
+    cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
+    cin>>s; continue;}
         if(s=='d')
-            {deschidere(a,x,y); system("cls"); afisare(a);}
+            {deschidere(a,x,y,dimensiune); system("cls"); afisare(a,dimensiune,flags);}
         else
             if(s=='f')
         {
-            a.mat[x][y].marcat=1; system("cls"); afisare(a);
+            a.mat[x][y].marcat=1; flags--; system("cls"); afisare(a,dimensiune,flags);
         }
         else
         {
-            a.mat[x][y].marcat=0; system("cls"); afisare(a);
+            a.mat[x][y].marcat=0; system("cls"); afisare(a,dimensiune,flags);
         }
-        if(corect(a)==1)
+        if(corect(a,dimensiune)==1)
         {
             system("cls"); cout<<"Ai castigat!"; return 0;
         }
-        cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
-        cin>>x>>y;
+        while(t[1]!=' '&&strlen(t)!=3&&!((t[0]>='0'&&t[0]<='9'||t[0]>='A'&&t[0]<='Z')&&(t[2]>='0'&&t[2]<='9'||t[2]>='A'&&t[2]<='Z')))
+                cin.getline(t,100);
+        if(t[0]>='0'&&t[0]<='9')
+            x=int(t[0]-'0');
+        else
+            x=int(t[0]-'A'+10);
+        if(t[2]>='0'&&t[2]<='9')
+            y=int(t[2]-'0');
+        else
+            y=int(t[2]-'A'+10);
         cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
         cin>>s;
         if(a.mat[x][y].val==-1&&s=='d')
             {
             system("cls");
             cout<<"Ai pierdut. Mai incearca!"<<endl;
-            afisare_pierdere(a);
+            afisare_pierdere(a,dimensiune);
             return 0;}
     }
     return 0;
