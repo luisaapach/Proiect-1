@@ -141,7 +141,35 @@ void afisare_pierdere(matrice a,int nrLinii,int nrColoane)
 }
 
 int main(void)
+{   char sir[20],continua[20];
+    cout<<"Doriti sa vedeti regulile jocului MINESWEEPER?(DA/NU) ";
+    cin>>sir;
+    while(!(strcmp(sir,"da")==0||strcmp(sir,"DA")==0||strcmp(sir,"Da")==0||strcmp(sir,"nu")==0||strcmp(sir,"NU")==0||strcmp(sir,"Nu")==0))
+        cin>>sir;
+    if(strcmp(sir,"da")==0||strcmp(sir,"DA")==0||strcmp(sir,"Da")==0)
+        {
+            int n=1;
+            switch(n)
 {
+     case 1:
+             cout << "\n\r   O tabla contine anumite bombe, pe care jucatorul trebuie sa le intuiasca. Prin introducerea coordonatelor unui patrat impreuna cu caracterul 'd', acesta se deschide si valoarea sa arata numarul de bombe din cele 8 patrate invecinate lui (in cazul in care patratul e la margine, numarul de vecini este mai mic decat 8).";
+            n++;
+     case 2:
+        cout<<"\n\r   Pentru marcarea unui patrat, pe care il consideri ca fiind bomba, cu un stegulet, poti introduce caracterul 'f'; altfel, pentru a-l demarca, se poate folosi caracterul 'u'.";
+        n++;
+     case 3:
+        cout<<"\n\r   Jocul se termina cu succes cand toate patratele, cu exceptia bombelor, sunt descoperite. Jocul este pierdut cand se deschide un patrat ce ascunde o bomba.";
+            break;
+}
+    cout<<endl;
+    cout<<"\n   Doriti sa continuati jocul? ";
+        cin>>continua;
+        while(!(strcmp(continua,"da")==0||strcmp(continua,"DA")==0||strcmp(continua,"Da")==0||strcmp(continua,"nu")==0||strcmp(continua,"NU")==0||strcmp(continua,"Nu")==0))
+            cin>>continua;
+        if(strcmp(continua,"nu")==0||strcmp(continua,"NU")==0||strcmp(continua,"Nu")==0)
+            return 0;
+        system("cls");
+        }
     matrice a;
     char tip[20];
     cout<<"Sunteti incepator, intermediar sau expert?"<<endl;
