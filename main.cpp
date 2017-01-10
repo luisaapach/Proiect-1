@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstring>
 #include <iomanip>
+#include <fstream>
 using namespace std;
 struct matrice
 {
@@ -98,7 +99,7 @@ void afisare(matrice a,int nrLinii,int nrColoane,int flags)
             cout<<setw(2)<<char(i-10+'A')<<'|'<<" ";
         for(unsigned int j=0;j<nrColoane;j++)
             if(a.mat[i][j].deschisa==0&&a.mat[i][j].marcat==0)
-                cout<<'X'<<" ";
+                cout<<'_'<<" ";
             else
                 if(a.mat[i][j].marcat==1)
                     cout<<'F'<<" ";
@@ -132,14 +133,14 @@ void afisare_pierdere(matrice a,int nrLinii,int nrColoane)
                     bombeRamase++;}
             else
                 if(a.mat[i][j].deschisa==0)
-                    cout<<'X'<<" ";
+                    cout<<'_'<<" ";
                 else
                     cout<<a.mat[i][j].val<<" ";
         cout<<endl;
     }
     cout<<"Mai aveati de descoperit "<<bombeRamase<<" mine.";
 }
-
+int start_s;
 int main(void)
 {   char sir[20],continua[20];
     cout<<"Doriti sa vedeti regulile jocului MINESWEEPER?(DA/NU) ";
@@ -162,7 +163,7 @@ int main(void)
             break;
 }
     cout<<endl;
-    cout<<"\n   Doriti sa continuati jocul? ";
+    cout<<"\n   Doriti sa continuati jocul? (Da/Nu) ";
         cin>>continua;
         while(!(strcmp(continua,"da")==0||strcmp(continua,"DA")==0||strcmp(continua,"Da")==0||strcmp(continua,"nu")==0||strcmp(continua,"NU")==0||strcmp(continua,"Nu")==0))
             cin>>continua;
@@ -212,6 +213,7 @@ int main(void)
     {   system("cls");cout<<"Ai pierdut. Mai incearca!"<<endl;
         afisare_pierdere(a,nrLinii,nrColoane); return 0;
     }
+    int OK=0;
     while(corect(a,nrLinii,nrColoane)==0)
     {   if((s!='d'&&s!='f'&&s!='u')||!(x>=0&&x<nrLinii&&y>=0&&y<nrColoane))
         {
@@ -230,6 +232,10 @@ int main(void)
         cout<<"Dati f (flag/marcare mina) sau d (deschide) sau u (unflag/demarcare mina)."<<" ";
         cin>>s;
         cout<<endl;continue;}
+        if(OK==0)
+        {
+            OK=1;int start_s=clock();
+        }
         if(s=='d')
             {deschidere(a,x,y,nrLinii,nrColoane); system("cls"); afisare(a,nrLinii,nrColoane,flags);}
         else
@@ -239,11 +245,45 @@ int main(void)
         }
         else
         {
-            a.mat[x][y].marcat=0; system("cls"); afisare(a,nrLinii,nrColoane,flags);
+            a.mat[x][y].marcat=0; flags++;system("cls"); afisare(a,nrLinii,nrColoane,flags);
         }
-        if(corect(a,nrLinii,nrColoane)==1)
-        {
-            system("cls"); cout<<"Ai castigat!"; return 0;
+        if(corect(a,nrLinii,nrColoane))
+        {   int stop_s=clock();
+            system("cls"); cout<<"Ai castigat!"<<endl;
+            int timp=(stop_s-start_s)/double(CLOCKS_PER_SEC);
+            ifstream fin("records.in");
+            char rec[100];
+            fin>>rec;
+            int maxim=0,p=1;
+            for(int i=7;i<strlen(rec);i++)
+                {maxim=maxim*p+(rec[i]-'0'); p=p*10;}
+            int numar=-1; char v[1000][100];
+            if(maxim!=0)
+            {
+                while(fin.getline(rec,100))
+                {
+                    numar++; strcpy(v[numar],rec);
+                }
+
+            }
+            fin.close();
+            if(maxim==0||timp<maxim)
+            {
+            if(timp<maxim)
+            cout<<"Ati stabilit un nou record!"<<endl;
+            cout<<"Dati numele dumneavoastra."<<endl;
+            char nume[100];
+            cin>>nume;
+            ofstream fout("records.in");
+            fout<<"Record:"<<timp<<endl;
+            fout<<nume<<" "<<timp<<endl;
+            if(numar>=0)
+            {for(int i=1;i<numar;i++)
+                fout<<v[i]<<endl;
+            fout<<v[numar]; }
+            fout.close();
+            }
+            return 0;
         }
         cout<<"Dati coordonatele casutei pe care vreti sa o deschideti/marcati/demarcati."<<endl;
         cin>>l>>c;
@@ -266,5 +306,6 @@ int main(void)
             afisare_pierdere(a,nrLinii,nrColoane);
             return 0;}
     }
+
     return 0;
 }
