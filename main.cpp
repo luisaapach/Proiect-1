@@ -7,7 +7,7 @@
 using namespace std;
 struct matrice
 {
-    struct { int val; unsigned int deschisa; unsigned int marcat;}mat[17][17];
+    struct { int val; unsigned int deschisa; unsigned int marcat;}mat[38][38];
 };
 void umplere(matrice &a,int i,int j,int nrLinii,int nrColoane)
 {
@@ -65,7 +65,7 @@ void BKT_Fill(matrice &a, int i, int j,int nrLinii,int nrColoane)
 int corect(matrice a,int nrLinii,int nrColoane)
 {
     for(int i=0;i<nrLinii;i++)
-        for(int j=0;j<nrLinii;j++)
+        for(int j=0;j<nrColoane;j++)
             {if(a.mat[i][j].val==-1&&a.mat[i][j].marcat==0)
                 return 0;
             if(a.mat[i][j].val!=-1&&a.mat[i][j].deschisa==0)
@@ -159,7 +159,7 @@ int main(void)
         cout<<"\n\r   Pentru marcarea unui patrat, pe care il consideri ca fiind bomba, cu un stegulet, poti introduce caracterul 'f'; altfel, pentru a-l demarca, se poate folosi caracterul 'u'.";
         n++;
      case 3:
-        cout<<"\n\r   Jocul se termina cu succes cand toate patratele, cu exceptia bombelor, sunt descoperite si toate bombele sunt marcate. Jocul este pierdut cand se deschide un patrat ce ascunde o bomba.";
+        cout<<"\n\r   Jocul se termina cu succes cand toate patratele, cu exceptia bombelor, sunt descoperite si toate minele sunt marcate. Jocul este pierdut cand se deschide un patrat ce ascunde o bomba.";
             break;
 }
     cout<<endl;
@@ -171,13 +171,36 @@ int main(void)
             return 0;
         system("cls");
         }
-    matrice a;
-    char tip[20];
+    matrice a;char tip[20];
+    int nrLinii,nrColoane, nrBombe;
+    cout<<"Doriti sa va personalizati dimensiunea caroului?"<<endl;
+    cin.getline(continua,20);
+    while(!(strcmp(continua,"da")==0||strcmp(continua,"DA")==0||strcmp(continua,"Da")==0||strcmp(continua,"nu")==0||strcmp(continua,"NU")==0||strcmp(continua,"Nu")==0))
+         cin.getline(continua,20);
+    int lungime,latime;
+    if(strcmp(continua,"da")==0||strcmp(continua,"DA")==0||strcmp(continua,"Da")==0)
+    {
+        cout<<"Dati LUNGIMEA caroului.( Lungimea trebuie sa apartina intervalului [2,36] )"<<endl;
+        cin>>lungime;
+        while(!(lungime>=9&&lungime<=36))
+            cin>>lungime;
+        cout<<"Dati LATIMEA caroului.( Latimea trebuie sa apartina intervalului [2,36] )"<<endl;
+        cin>>latime;
+        while(!(latime>=9&&latime<=36))
+            cin>>latime;
+         nrLinii=lungime; nrColoane=latime;
+         if(nrLinii*nrColoane<100)
+            nrBombe=nrLinii*nrColoane/2+5;
+         else
+            nrBombe=nrLinii*nrColoane/10+5;
+        strcpy(tip,"0");
+    }
+    else
+    {
     cout<<"Sunteti incepator, intermediar sau expert?"<<endl;
     cin.getline(tip,20);
     while(!(strcmp(tip,"incepator")==0||strcmp(tip,"Incepator")==0||strcmp(tip,"intermediar")==0||strcmp(tip,"Intermediar")==0||strcmp(tip,"expert")==0||strcmp(tip,"Expert")==0))
          cin.getline(tip,20);
-    int nrLinii,nrColoane, nrBombe;
     if(strcmp(tip,"incepator")==0||strcmp(tip,"Incepator")==0)
         {
             nrLinii=9; nrColoane=9; nrBombe=10;
@@ -190,7 +213,7 @@ int main(void)
     else
         {
             nrLinii=16; nrColoane=16; nrBombe=40;
-        }
+        }}
     generare_harta(a,nrLinii,nrColoane,nrBombe);
     int flags=nrBombe;
     afisare(a,nrLinii,nrColoane,flags);
@@ -251,7 +274,11 @@ int main(void)
         {   int stop_s=clock();
             system("cls"); cout<<"Ai castigat!"<<endl;
             int timp=(stop_s-start_s)/double(CLOCKS_PER_SEC);
-            ifstream fin("records.in");
+            if(strcmp(tip,"0")==0)
+                {cout<<"Ati terminat jocul in: "<<timp<<" secunde"<<endl;
+            return 0;}
+            if(strcmp(tip,"incepator")==0||strcmp(tip,"Incepator")==0)
+            {ifstream fin("records-incepator");
             char rec[100];
             fin>>rec;
             int maxim=0,p=1;
@@ -274,7 +301,7 @@ int main(void)
             cout<<"Dati numele dumneavoastra."<<endl;
             char nume[100];
             cin>>nume;
-            ofstream fout("records.in");
+            ofstream fout("records-incepator");
             fout<<"Record:"<<timp<<endl;
             fout<<nume<<" "<<timp<<endl;
             if(numar>=0)
@@ -282,6 +309,77 @@ int main(void)
                 fout<<v[i]<<endl;
             fout<<v[numar]; }
             fout.close();
+            }}
+            else
+                if(strcmp(tip,"intermediar")==0||strcmp(tip,"Intermediar")==0)
+            {
+                ifstream fin1("records-intermediar");
+                char rec[100];
+            fin1>>rec;
+            int maxim=0,p=1;
+            for(int i=7;i<strlen(rec);i++)
+                {maxim=maxim*p+(rec[i]-'0'); p=p*10;}
+            int numar=-1; char v[1000][100];
+            if(maxim!=0)
+            {
+                while(fin1.getline(rec,100))
+                {
+                    numar++; strcpy(v[numar],rec);
+                }
+
+            }
+            fin1.close();
+            if(maxim==0||timp<maxim)
+            {
+            if(timp<maxim)
+            cout<<"Ati stabilit un nou record!"<<endl;
+            cout<<"Dati numele dumneavoastra."<<endl;
+            char nume[100];
+            cin>>nume;
+            ofstream fout1("records-intermediar");
+            fout1<<"Record:"<<timp<<endl;
+            fout1<<nume<<" "<<timp<<endl;
+            if(numar>=0)
+            {for(int i=1;i<numar;i++)
+                fout1<<v[i]<<endl;
+            fout1<<v[numar]; }
+            fout1.close();
+            }
+            }
+            else
+            {
+                ifstream fin2("records-expert");
+                char rec[100];
+            fin2>>rec;
+            int maxim=0,p=1;
+            for(int i=7;i<strlen(rec);i++)
+                {maxim=maxim*p+(rec[i]-'0'); p=p*10;}
+            int numar=-1; char v[1000][100];
+            if(maxim!=0)
+            {
+                while(fin2.getline(rec,100))
+                {
+                    numar++; strcpy(v[numar],rec);
+                }
+
+            }
+            fin2.close();
+            if(maxim==0||timp<maxim)
+            {
+            if(timp<maxim)
+            cout<<"Ati stabilit un nou record!"<<endl;
+            cout<<"Dati numele dumneavoastra."<<endl;
+            char nume[100];
+            cin>>nume;
+            ofstream fout2("records-expert");
+            fout2<<"Record:"<<timp<<endl;
+            fout2<<nume<<" "<<timp<<endl;
+            if(numar>=0)
+            {for(int i=1;i<numar;i++)
+                fout2<<v[i]<<endl;
+            fout2<<v[numar]; }
+            fout2.close();
+            }
             }
             return 0;
         }
