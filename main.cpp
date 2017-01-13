@@ -159,7 +159,7 @@ int main(void)
         cout<<"\n\r   Pentru marcarea unui patrat, pe care il consideri ca fiind bomba, cu un stegulet, poti introduce caracterul 'f'; altfel, pentru a-l demarca, se poate folosi caracterul 'u'.";
         n++;
      case 3:
-        cout<<"\n\r   Jocul se termina cu succes cand toate patratele, cu exceptia bombelor, sunt descoperite. Jocul este pierdut cand se deschide un patrat ce ascunde o bomba.";
+        cout<<"\n\r   Jocul se termina cu succes cand toate patratele, cu exceptia bombelor, sunt descoperite si toate bombele sunt marcate. Jocul este pierdut cand se deschide un patrat ce ascunde o bomba.";
             break;
 }
     cout<<endl;
